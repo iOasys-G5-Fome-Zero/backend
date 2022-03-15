@@ -9,12 +9,6 @@ export default () => {
     refreshSecret: process.env.REFRESH_JWT_SECRET,
     refreshExpiresIn: process.env.REFRESH_EXPIRES_IN,
 
-    dbHost: process.env.DB_HOST,
-    dbPort: parseInt(process.env.DB_PORT, 5432),
-    dbUser: process.env.DB_USER,
-    dbPassword: process.env.DB_PASSWORD,
-    dbName: process.env.DB_NAME,
-
     adminID: process.env.ADMIN_ID,
     adminPassword: process.env.ADMIN_PASSWORD,
     adminEmail: process.env.ADMIN_EMAIL,
