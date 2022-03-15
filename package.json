@@ -1,5 +1,5 @@
 {
-  "name": "fashion-ecommerce",
+  "name": "ioasys-g5-fome-zero-api",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -51,10 +51,10 @@
     "swagger-ui-express": "^4.3.0",
     "typeorm": "^0.2.41",
     "uuid": "^8.3.2",
-    "winston": "^3.5.1"
+    "winston": "^3.5.1",
+    "@nestjs/cli": "^8.0.0"
   },
   "devDependencies": {
-    "@nestjs/cli": "^8.0.0",
     "@nestjs/schematics": "^8.0.0",
     "@nestjs/testing": "^8.0.0",
     "@types/cookie-parser": "^1.4.2",
