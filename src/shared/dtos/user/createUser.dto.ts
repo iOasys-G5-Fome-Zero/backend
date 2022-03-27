@@ -1,11 +1,17 @@
+import { UserType } from '@shared/entities/user/usersType.entity';
+
 export class CreateUserDTO {
   public id: string;
 
-  public fullName: string;
+  public firstName: string;
 
-  public cpf: string;
+  public lastName: string;
 
-  public email: string;
+  public userType: UserType;
 
-  public password: string;
+  public email?: string;
+
+  public phone?: string;
+
+  public password?: string;
 }

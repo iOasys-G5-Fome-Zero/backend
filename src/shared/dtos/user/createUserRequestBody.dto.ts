@@ -6,7 +6,11 @@ import {
   Length,
   Matches,
   IsNumberString,
+  ValidateIf,
+  IsEnum,
 } from 'class-validator';
+
+import { UserType } from '@shared/entities/user/usersType.entity';
 
 const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[`~!@#$%^&*=(+){}|'";\\:[><.\],?/-]).{8,}$/;
@@ -16,19 +20,29 @@ export class CreateUserRequestBodyDTO {
   @IsString()
   @IsNotEmpty()
   @Length(3, 50)
-  public fullName: string;
+  public firstName: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @Length(11, 11)
-  @IsNumberString()
-  public cpf: string;
+  @Length(3, 50)
+  public lastName: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @IsEnum(UserType)
+  public userType: UserType;
 
   @ApiProperty()
   @IsEmail()
-  @IsNotEmpty()
+  @ValidateIf((o) => !o.phone || o.email)
   public email: string;
+
+  @ApiProperty()
+  @IsNumberString()
+  @ValidateIf((o) => !o.email || o.phone)
+  public phone: string;
 
   @ApiProperty()
   @IsString()

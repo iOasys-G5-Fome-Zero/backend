@@ -6,7 +6,9 @@ import {
 } from '@nestjs/swagger';
 
 import { CreateUserRequestBodyDTO } from '@shared/dtos/user/createUserRequestBody.dto';
+
 import { User } from '@shared/entities/user/user.entity';
+
 import { instanceToInstance } from 'class-transformer';
 
 import { CreateUserUseCase } from '@modules/users/contexts/createUser/createUser.useCase';
@@ -15,7 +17,7 @@ import { Public } from '@shared/decorators/isPublic.decorator';
 @ApiTags('Users')
 @Controller('users/new-user')
 export class CreateUserController {
-  constructor(private createUserUseCase: CreateUserUseCase) {}
+  constructor(private readonly createUserUseCase: CreateUserUseCase) {}
 
   @Public()
   @Post()

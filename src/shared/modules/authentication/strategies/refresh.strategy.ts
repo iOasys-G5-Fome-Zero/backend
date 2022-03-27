@@ -6,7 +6,7 @@ import envVariables from '@config/env';
 
 import { BcryptProvider } from '@shared/providers/EncryptProvider/bcrypt.provider';
 
-import { TokensRepository } from '@shared/modules/authentication/repository/tokens.repository';
+import { UserRepository } from '@modules/users/repository/user.repository';
 
 import { PayloadDTO } from '@shared/dtos/authentication/payload.dto';
 
@@ -18,8 +18,8 @@ export class RefreshStrategy extends PassportStrategy(
   constructor(
     @Inject('ENCRYPT_PROVIDER')
     private readonly encryption: BcryptProvider,
-    @InjectRepository(TokensRepository)
-    private readonly tokensRepository: TokensRepository,
+    @InjectRepository(UserRepository)
+    private readonly userRepository: UserRepository,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -34,16 +34,13 @@ export class RefreshStrategy extends PassportStrategy(
   async validate(req, payload: PayloadDTO): Promise<PayloadDTO> {
     const refreshToken = req?.cookies?.Refresh;
 
-    const jwtToken = await this.tokensRepository.findTokensByUserId(
-      payload.userID,
-    );
+    const user = await this.userRepository.findRefreshTokenByUserID(payload.id);
 
-    if (!jwtToken.refreshToken) {
+    if (!user.refreshToken) {
       throw new UnauthorizedException();
     }
 
-    const hashedRefreshTokenFromDB = jwtToken.refreshToken;
-
+    const hashedRefreshTokenFromDB = user.refreshToken;
     const validRefreshToken = await this.encryption.compareHash(
       refreshToken,
       hashedRefreshTokenFromDB,
@@ -54,9 +51,9 @@ export class RefreshStrategy extends PassportStrategy(
     }
 
     return {
-      userID: payload.userID,
-      email: payload.email,
-      isAdmin: payload.isAdmin,
+      id: payload.id,
+      firstName: payload.firstName,
+      userType: payload.userType,
     };
   }
 }

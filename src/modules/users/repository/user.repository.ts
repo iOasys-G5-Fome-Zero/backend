@@ -1,16 +1,23 @@
 import { EntityRepository, Repository } from 'typeorm';
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, ConsoleLogger } from '@nestjs/common';
 
 import { CreateUserDTO } from '@shared/dtos/user/createUser.dto';
 import { EditUserDTO } from '@shared/dtos/user/editUser.dto';
+import { TokensDTO } from '@shared/dtos/authentication/saveToken.dto';
+
 import { User } from '@shared/entities/user/user.entity';
-import { notFound, unexpected } from '@shared/constants/errors';
+
+import { unexpected } from '@shared/constants/errors';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
-  async findUserByEmail(email: string): Promise<User | undefined> {
+  async findUserByEmailOrPhone(
+    phoneOrEmail: string,
+  ): Promise<User | undefined> {
     try {
-      return await this.findOne({ email });
+      return await this.findOne({
+        where: [{ email: phoneOrEmail }, { phone: phoneOrEmail }],
+      });
     } catch (error) {
       throw new ConflictException(unexpected(error.message));
     }
@@ -19,24 +26,6 @@ export class UserRepository extends Repository<User> {
   async findUserById(id: string): Promise<User | undefined> {
     try {
       return await this.findOne(id);
-    } catch (error) {
-      throw new ConflictException(unexpected(error.message));
-    }
-  }
-
-  async getAllUsers(): Promise<User[]> {
-    try {
-      return await this.find({
-        select: [
-          'id',
-          'email',
-          'admin',
-          'active',
-          'createdAt',
-          'updatedAt',
-          'deletedAt',
-        ],
-      });
     } catch (error) {
       throw new ConflictException(unexpected(error.message));
     }
@@ -57,7 +46,7 @@ export class UserRepository extends Repository<User> {
         .softDelete()
         .from(User)
         .where('id = :id', { id })
-        .returning('full_name, cpf, email')
+        .returning('id, first_name, last_name, user_type, cpf')
         .execute();
       return response.raw[0];
     } catch (error) {
@@ -70,7 +59,7 @@ export class UserRepository extends Repository<User> {
       const updatedData = await this.createQueryBuilder('users')
         .update<User>(User, { ...newUserData })
         .where('id = :userID', { userID })
-        .returning('full_name, cpf, email')
+        .returning('first_name, last_name, cpf')
         .updateEntity(true)
         .execute();
       return updatedData.raw[0];
@@ -79,59 +68,61 @@ export class UserRepository extends Repository<User> {
     }
   }
 
-  async handleUserAdmin(userID: string, admin: boolean): Promise<User> {
+  async saveTokens(userID: string, tokensDTO: TokensDTO): Promise<User> {
     try {
-      const updatedData = await this.createQueryBuilder('users')
-        .update<User>(User, { admin: admin })
+      const user = await this.createQueryBuilder('users')
+        .update<User>(User, { ...tokensDTO })
         .where('id = :userID', { userID })
-        .returning('id, full_name, cpf, email, admin')
+        .returning('*')
         .updateEntity(true)
         .execute();
-      return updatedData.raw[0];
+      return user.raw[0];
     } catch (error) {
       throw new ConflictException(unexpected(error.message));
     }
   }
 
-  async removeDefaultAddress(userID: string): Promise<void> {
+  async updateToken(userID: string, token: string): Promise<User> {
     try {
-      await this.createQueryBuilder('users')
-        .update<User>(User, {
-          defaultAddressID: null,
-        })
+      const user = await this.createQueryBuilder('users')
+        .update<User>(User, { token })
         .where('id = :userID', { userID })
+        .returning('*')
+        .updateEntity(true)
         .execute();
+      return user.raw[0];
     } catch (error) {
       throw new ConflictException(unexpected(error.message));
     }
   }
 
-  async setDefaultAddress(addressID: string, userID: string): Promise<void> {
+  async deleteTokens(userID: string): Promise<User> {
     try {
-      await this.createQueryBuilder('users')
-        .update<User>(User, {
-          defaultAddressID: addressID,
-        })
+      const user = await this.createQueryBuilder('users')
+        .update<User>(User, { token: null, refreshToken: null })
         .where('id = :userID', { userID })
+        .returning('*')
+        .updateEntity(true)
         .execute();
+      return user.raw[0];
     } catch (error) {
-      if (/violates foreign key/gi.test(error.message)) {
-        throw new ConflictException(notFound('Address'));
-      }
       throw new ConflictException(unexpected(error.message));
     }
   }
 
-  async getCheckOutData(userID: string): Promise<User> {
+  async findTokenByUserID(id: string): Promise<User | undefined> {
     try {
-      // const user = await this.createQueryBuilder('users')
-      //   .leftJoin('users.defaultAddressID', 'address')
-      //   .where('users.id = :userID', { userID })
-      //   .select(['users.fullName, users.cpf, address.id'])
-      //   .getOne();
+      return await this.findOne({ where: { id }, select: ['token'] });
+    } catch (error) {
+      throw new ConflictException(unexpected(error.message));
+    }
+  }
+
+  async findRefreshTokenByUserID(id: string): Promise<User | undefined> {
+    try {
       const user = await this.findOne({
-        where: { id: userID },
-        select: ['fullName', 'cpf', 'defaultAddressID'],
+        where: { id },
+        select: ['refreshToken'],
       });
       return user;
     } catch (error) {

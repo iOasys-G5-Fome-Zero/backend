@@ -8,7 +8,7 @@ export class CryptoProvider {
 
   decryptUser(user: User): User {
     const decryptedData = {
-      fullName: this.decrypt(user.fullName),
+      fullName: this.decrypt(user.firstName),
       cpf: this.decrypt(user.cpf),
       email: this.decrypt(user.email),
     };

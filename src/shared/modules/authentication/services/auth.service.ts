@@ -2,36 +2,85 @@ import { Injectable, Inject, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import envVariables from '@config/env';
+import { v4 as uuidV4 } from 'uuid';
 
-import { User } from '@shared/entities/user/user.entity';
 import { PayloadDTO } from '@shared/dtos/authentication/payload.dto';
 import { LoginResponseDTO } from '@shared/dtos/authentication/loginResponse.dto';
+import { RefreshResponseDTO } from '@shared/dtos/authentication/refreshResponse.dto';
+import { AuthWithGoogleDTO } from '@shared/dtos/authentication/authWithGoogle.dto';
+
+import { User } from '@shared/entities/user/user.entity';
 
 import { requestNotCompleted } from '@shared/constants/errors';
 
 import { BcryptProvider } from '@shared/providers/EncryptProvider/bcrypt.provider';
 import { CryptoProvider } from '@shared/providers/EncryptProvider/crypto.provider';
 
-import { TokensRepository } from '@shared/modules/authentication/repository/tokens.repository';
 import { UserRepository } from '@modules/users/repository/user.repository';
+import { BuyerRepository } from '@modules/buyers/repository/buyer.repository';
+import { SellerRepository } from '@modules/sellers/repository/seller.repository';
+
+import { google, Auth } from 'googleapis';
 
 @Injectable()
 export class AuthService {
+  oauthClient: Auth.OAuth2Client;
   constructor(
     @Inject('ENCRYPT_PROVIDER')
     private readonly encryption: BcryptProvider,
     @Inject('CRYPTO_PROVIDER')
     private readonly crypto: CryptoProvider,
     private readonly jwtService: JwtService,
-    @InjectRepository(TokensRepository)
-    private readonly tokensRepository: TokensRepository,
     @InjectRepository(UserRepository)
-    private userRepository: UserRepository,
-  ) {}
+    private readonly userRepository: UserRepository,
+    @InjectRepository(BuyerRepository)
+    private readonly buyerRepository: BuyerRepository,
+    @InjectRepository(SellerRepository)
+    private readonly sellerRepository: SellerRepository,
+  ) {
+    this.oauthClient = new google.auth.OAuth2(
+      envVariables().googleClientID,
+      envVariables().googleSecret,
+      envVariables().googleRedirectURI,
+    );
+  }
 
-  async validateUser(email: string, password: string): Promise<User | null> {
-    const encryptedEmail = this.crypto.encrypt(email);
-    const user = await this.userRepository.findUserByEmail(encryptedEmail);
+  async authenticateWithGoogle({
+    code,
+    userType,
+  }: AuthWithGoogleDTO): Promise<LoginResponseDTO> {
+    const { tokens } = await this.oauthClient.getToken(code);
+    const userData = await this.getUserData(tokens.access_token);
+
+    let user = await this.userRepository.findUserByEmailOrPhone(userData.email);
+
+    if (!user) {
+      user = await this.userRepository.createUser({
+        id: uuidV4(),
+        firstName: userData.name,
+        lastName: userData.family_name,
+        email: userData.email,
+        userType,
+      });
+
+      const specialization = {
+        buyer: (user) => this.buyerRepository.createBuyer(user),
+        seller: (user) => this.sellerRepository.createSeller(user),
+      };
+
+      await specialization[user.userType]({ userID: user.id }); // create SPECIALIZATION
+    }
+
+    return this.login(user);
+  }
+
+  async validateUser(
+    phoneOrEmail: string,
+    password: string,
+  ): Promise<User | null> {
+    const encryptedPhoneOrEmail = this.crypto.encrypt(phoneOrEmail);
+
+    const user = await this.userRepository.findUserByEmailOrPhone(phoneOrEmail);
 
     let validPassword: boolean;
 
@@ -48,11 +97,11 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User): Promise<LoginResponseDTO> {
+  async login(reqUser: User): Promise<LoginResponseDTO> {
     const payload = {
-      userID: user.id,
-      email: user.email,
-      isAdmin: user.admin,
+      id: reqUser.id,
+      firstName: reqUser.firstName,
+      userType: reqUser.userType,
     };
 
     const { accessCookie, accessToken } = await this.getAccessCookie(payload);
@@ -63,58 +112,58 @@ export class AuthService {
     const hashedAccessToken = this.encryption.createHash(accessToken);
     const hashedRefresToken = this.encryption.createHash(refreshToken);
 
-    const response = await this.tokensRepository.saveTokens({
-      userID: user.id,
-      jwtToken: hashedAccessToken,
+    const user = await this.userRepository.saveTokens(reqUser.id, {
+      token: hashedAccessToken,
       refreshToken: hashedRefresToken,
     });
 
-    if (!response) {
+    if (!user) {
       throw new ConflictException(
         requestNotCompleted('saveTokens:auth.service'),
       );
     }
 
-    return { accessCookie, refreshCookie };
+    return { user, accessCookie, refreshCookie };
   }
 
   logout(): string[] {
     return this.getLogOutCookie();
   }
 
-  async refresh(payload: PayloadDTO): Promise<string> {
+  async refresh(payload: PayloadDTO): Promise<RefreshResponseDTO> {
     const { accessCookie, accessToken } = await this.getAccessCookie(payload);
 
     const hashedAccessToken = this.encryption.createHash(accessToken);
 
-    const response = await this.tokensRepository.updateJwtToken(
-      payload.userID,
+    const user = await this.userRepository.updateToken(
+      payload.id,
       hashedAccessToken,
     );
 
-    if (!response) {
+    if (!user) {
       throw new ConflictException(
         requestNotCompleted('updateJwtToken:auth.service'),
       );
     }
 
-    return accessCookie;
+    return { user, accessCookie };
   }
 
-  async removeTokensFromUser(userID: string): Promise<void> {
-    const response = await this.tokensRepository.deleteTokens(userID);
-    if (!response) {
+  async removeTokensFromUser(userID: string): Promise<User> {
+    const user = await this.userRepository.deleteTokens(userID);
+    if (!user) {
       throw new ConflictException(
         requestNotCompleted('removeTokensFromUser:auth.service'),
       );
     }
+    return user;
   }
 
   // =========================================================================================
   // PRIVATE METHODS
   // =========================================================================================
-  private async getAccessCookie({ userID, email, isAdmin }: PayloadDTO) {
-    const payload = { userID, email, isAdmin };
+  private async getAccessCookie({ id, firstName, userType }: PayloadDTO) {
+    const payload = { id, firstName, userType };
     const expirationTime = envVariables().expiresIn;
     const accessToken = this.jwtService.sign(payload, {
       secret: envVariables().jwtSecret,
@@ -124,8 +173,8 @@ export class AuthService {
     return { accessCookie, accessToken };
   }
 
-  private async getRefreshCookie({ userID, email, isAdmin }: PayloadDTO) {
-    const payload = { userID, email, isAdmin };
+  private async getRefreshCookie({ id, firstName, userType }: PayloadDTO) {
+    const payload = { id, firstName, userType };
     const expirationTime = envVariables().refreshExpiresIn;
     const refreshToken = this.jwtService.sign(payload, {
       secret: envVariables().refreshSecret,
@@ -140,5 +189,17 @@ export class AuthService {
       'Authentication=; HttpOnly; Path=/; Max-Age=0',
       'Refresh=; HttpOnly; Path=/; Max-Age=0',
     ];
+  }
+
+  private async getUserData(access_token: string) {
+    const userInfoClient = google.oauth2('v2').userinfo;
+
+    this.oauthClient.setCredentials({ access_token });
+
+    const userInfoResponse = await userInfoClient.get({
+      auth: this.oauthClient,
+    });
+
+    return userInfoResponse.data;
   }
 }

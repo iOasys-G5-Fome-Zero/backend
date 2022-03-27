@@ -1,7 +1,13 @@
 export class EditUserDTO {
-  public fullName?: string;
+  public firstName?: string;
+
+  public lastName?: string;
+
+  public email?: string;
+
+  public phone?: string;
 
   public cpf?: string;
 
-  public email?: string;
+  public password?: string;
 }

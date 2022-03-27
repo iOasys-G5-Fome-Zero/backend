@@ -1,7 +1,9 @@
+import { UserType } from '@shared/entities/user/usersType.entity';
+
 export class PayloadDTO {
-  public userID: string;
+  public id: string;
 
-  public email: string;
+  public firstName: string;
 
-  public isAdmin: boolean;
+  public userType: UserType;
 }

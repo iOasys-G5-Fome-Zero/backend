@@ -1,20 +1,30 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as uuidV4 } from 'uuid';
+
 import { BcryptProvider } from '@shared/providers/EncryptProvider/bcrypt.provider';
 import { CryptoProvider } from '@shared/providers/EncryptProvider/crypto.provider';
 
 import { alreadyExists } from '@shared/constants/errors';
 
-import { CreateUserRequestBodyDTO } from '@shared/dtos/user/createUserRequestBody.dto';
-import { User } from '@shared/entities/user/user.entity';
 import { UserRepository } from '@modules/users/repository/user.repository';
+import { SellerRepository } from '@modules/sellers/repository/seller.repository';
+import { BuyerRepository } from '@modules/buyers/repository/buyer.repository';
+
+import { CreateUserRequestBodyDTO } from '@shared/dtos/user/createUserRequestBody.dto';
+import { CreateUserDTO } from '@shared/dtos/user/createUser.dto';
+
+import { User } from '@shared/entities/user/user.entity';
 
 @Injectable()
 export class CreateUserUseCase {
   constructor(
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
+    @InjectRepository(BuyerRepository)
+    private readonly buyerRepository: BuyerRepository,
+    @InjectRepository(SellerRepository)
+    private readonly sellerRepository: SellerRepository,
     @Inject('ENCRYPT_PROVIDER')
     private readonly encryption: BcryptProvider,
     @Inject('CRYPTO_PROVIDER')
@@ -22,27 +32,32 @@ export class CreateUserUseCase {
   ) {}
 
   async execute({
-    fullName,
-    cpf,
+    firstName,
+    lastName,
+    phone,
     email,
+    userType,
     password,
   }: CreateUserRequestBodyDTO): Promise<User> {
-    const savedUser = await this.userRepository.findUserByEmail(email);
-
-    if (savedUser) {
-      throw new ConflictException(alreadyExists('email'));
-    }
-
     const hashedPassword = this.encryption.createHash(password);
 
     const user = await this.userRepository.createUser({
       id: uuidV4(),
-      fullName: this.crypto.encrypt(fullName),
-      cpf: this.crypto.encrypt(cpf),
-      email: this.crypto.encrypt(email),
+      firstName,
+      lastName,
+      phone,
+      email,
+      userType,
       password: hashedPassword,
     });
 
-    return this.crypto.decryptUser(user);
+    const specialization = {
+      buyer: (user) => this.buyerRepository.createBuyer(user),
+      seller: (user) => this.sellerRepository.createSeller(user),
+    };
+
+    await specialization[user.userType]({ userID: user.id }); // create SPECIALIZATION
+
+    return user;
   }
 }

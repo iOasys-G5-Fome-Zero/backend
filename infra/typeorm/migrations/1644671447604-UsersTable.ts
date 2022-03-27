@@ -3,22 +3,30 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class UsersTable1644671447604 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-        CREATE TABLE Users (
+        CREATE TYPE user_type AS ENUM ('buyer','seller');
+        CREATE TABLE users (
             id varchar(255) PRIMARY KEY,
-            full_name varchar(255) NOT NULL,
-            cpf varchar(33) NOT NULL UNIQUE,
-            email varchar(255) NOT NULL UNIQUE,
-            password varchar(255),
-            default_address_id varchar(765) NULL,
-            admin boolean DEFAULT false,
-            active boolean DEFAULT true,
+            first_name varchar(255) NOT NULL,
+            last_name varchar(255) NOT NULL,
+            user_type user_type NOT NULL,
+            email varchar(255) UNIQUE,
+            phone varchar(255) UNIQUE,
+            cpf varchar(33) NULL,
+            password varchar(255) NULL,
+            token varchar(255) NULL UNIQUE,
+            refresh_token varchar(255) NULL UNIQUE,
             created_at timestamp DEFAULT CURRENT_TIMESTAMP,
             updated_at timestamp DEFAULT CURRENT_TIMESTAMP,
             deleted_at timestamp 
-        );`);
+        );
+        ALTER TABLE users ADD CONSTRAINT email_or_phone_null CHECK (phone IS NOT NULL OR email IS NOT NULL);
+        `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DROP TABLE Users');
+    await queryRunner.query(
+      `ALTER TABLE users DROP CONSTRAINT email_or_phone_null;
+       DROP TABLE users; DROP TYPE user_type`,
+    );
   }
 }

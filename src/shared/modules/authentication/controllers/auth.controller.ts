@@ -3,8 +3,8 @@ import {
   Request,
   Post,
   Get,
-  UseGuards,
   Body,
+  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -14,33 +14,60 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Public } from '@shared/decorators/isPublic.decorator';
+import { instanceToInstance } from 'class-transformer';
 
-import { LoginRequestBodyDTO } from '@shared/dtos/authentication/loginRequestBody.dto';
+import { LoginRequestBodyDTO } from '@shared/dtos/authentication/LoginRequestBody.dto';
+import { User } from '@shared/entities/user/user.entity';
+import { AuthWithGoogleDTO } from '@shared/dtos/authentication/authWithGoogle.dto';
+
 import { LocalAuthGuard } from '@shared/modules/authentication/guards/local-auth.guard';
-import { AuthService } from '@shared/modules/authentication/services/auth.service';
+import { AuthService } from '@shared/modules/authentication/services/Auth.service';
 import { RefreshTokenAuthGuard } from '@shared/modules/authentication/guards/refresh-auth.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
+
+  @Post('google-auth')
+  @Public()
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiCreatedResponse({
+    type: User,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+  })
+  async googleAuth(
+    @Body() authWithGoogleDTO: AuthWithGoogleDTO,
+    @Request() req,
+  ) {
+    const response = await this.authService.authenticateWithGoogle(
+      authWithGoogleDTO,
+    );
+    const { accessCookie, refreshCookie } = response;
+    req.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
+    return instanceToInstance(response.user);
+  }
 
   @UseGuards(LocalAuthGuard)
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiCreatedResponse({
-    description: 'successfully authenticated',
+    type: User,
   })
   @ApiBadRequestResponse({
     description: 'Bad Request',
   })
-  async login(@Body() loginBody: LoginRequestBodyDTO, @Request() req) {
-    const { accessCookie, refreshCookie } = await this.authService.login(
-      req.user,
-    );
+  async login(
+    @Body() loginRequestBodyDTO: LoginRequestBodyDTO,
+    @Request() req,
+  ) {
+    const response = await this.authService.login(req.user);
+    const { accessCookie, refreshCookie } = response;
     req.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
-    return { message: 'successfully authenticated' };
+    return instanceToInstance(response.user);
   }
 
   @UseGuards(RefreshTokenAuthGuard)
@@ -48,29 +75,29 @@ export class AuthController {
   @Get('refresh')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiCreatedResponse({
-    description: 'token successfully refreshed',
+    type: User,
   })
   @ApiBadRequestResponse({
     description: 'Unauthorized',
   })
   async refresh(@Request() req) {
-    const accessCookie = await this.authService.refresh(req.user);
+    const { user, accessCookie } = await this.authService.refresh(req.user);
     req.res.setHeader('Set-Cookie', accessCookie);
-    return { message: 'token successfully refreshed' };
+    return instanceToInstance(user);
   }
 
   @Get('logout')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiCreatedResponse({
-    description: 'successfully logged out',
+    type: User,
   })
   @ApiBadRequestResponse({
     description: 'not logged in',
   })
   async logout(@Request() req) {
-    await this.authService.removeTokensFromUser(req.user.userID);
+    const user = await this.authService.removeTokensFromUser(req.user.id);
     const logoutCookies = this.authService.logout();
     req.res.setHeader('Set-Cookie', logoutCookies);
-    return { message: 'successfully logged out' };
+    return instanceToInstance(user);
   }
 }

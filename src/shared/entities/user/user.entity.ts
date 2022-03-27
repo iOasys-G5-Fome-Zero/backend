@@ -8,50 +8,54 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  ManyToOne,
-  JoinColumn,
+  Check,
 } from 'typeorm';
 
-import { JwtToken } from '@shared/entities/jwtToken/jwtToken.entity';
+import { UserType } from '@shared/entities/user/usersType.entity';
 
 @Entity('users')
-@Unique(['email', 'cpf'])
+@Unique(['cpf', 'email', 'phone', 'token', 'refreshToken'])
+@Check(`"phone" IS NOT NULL OR "email" IS NOT NULL`)
 export class User {
   @ApiProperty()
   @PrimaryGeneratedColumn('uuid')
-  @ManyToOne(() => JwtToken)
-  @JoinColumn({ name: 'id', referencedColumnName: 'userID' })
   public id: string;
 
   @ApiProperty()
-  @Column({ name: 'full_name' })
-  public fullName: string;
+  @Column({ name: 'first_name' })
+  public firstName: string;
 
   @ApiProperty()
-  @Column()
-  public cpf: string;
+  @Column({ name: 'last_name' })
+  public lastName: string;
+
+  @ApiProperty()
+  @Column({ name: 'user_type' })
+  public userType: UserType;
 
   @ApiProperty()
   @Column()
   public email: string;
 
+  @ApiProperty()
   @Column()
+  public phone: string;
+
+  @ApiProperty()
+  @Column()
+  public cpf: string;
+
   @Exclude()
+  @Column()
   public password: string;
 
-  @ApiProperty()
-  // typeorm can't direct retrieve values with FK link : 'https://typeorm.io/#/relations-faq/how-to-use-relation-id-without-joining-relation'
-  // Therfore, I decided to remove this one to one link from typeORM
-  @Column({ name: 'default_address_id' })
-  public defaultAddressID: string;
-
-  @ApiProperty()
+  @Exclude()
   @Column()
-  public admin: boolean;
+  public token: string;
 
-  @ApiProperty()
-  @Column()
-  public active: boolean;
+  @Exclude()
+  @Column({ name: 'refresh_token' })
+  public refreshToken: string;
 
   @ApiProperty()
   @CreateDateColumn({ name: 'created_at' })
@@ -63,13 +67,4 @@ export class User {
 
   @DeleteDateColumn({ name: 'deleted_at' })
   public deletedAt: Date;
-
-  // @ApiProperty()
-  // @ManyToMany(() => Terms)
-  // @JoinTable({
-  //   name: 'terms_users',
-  //   joinColumns: [{ name: 'user_id' }],
-  //   inverseJoinColumns: [{ name: 'term_id' }],
-  // })
-  // terms: Terms[];
 }
