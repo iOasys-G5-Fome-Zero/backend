@@ -16,12 +16,12 @@ import {
 import { Public } from '@shared/decorators/isPublic.decorator';
 import { instanceToInstance } from 'class-transformer';
 
-import { LoginRequestBodyDTO } from '@shared/dtos/authentication/LoginRequestBody.dto';
+import { LoginRequestBodyDTO } from '@shared/dtos/authentication/loginRequestBody.dto';
 import { User } from '@shared/entities/user/user.entity';
 import { AuthWithGoogleDTO } from '@shared/dtos/authentication/authWithGoogle.dto';
 
 import { LocalAuthGuard } from '@shared/modules/authentication/guards/local-auth.guard';
-import { AuthService } from '@shared/modules/authentication/services/Auth.service';
+import { AuthService } from '@shared/modules/authentication/services/auth.service';
 import { RefreshTokenAuthGuard } from '@shared/modules/authentication/guards/refresh-auth.guard';
 
 @ApiTags('Auth')

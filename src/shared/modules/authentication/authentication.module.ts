@@ -12,7 +12,7 @@ import { RefreshStrategy } from '@shared/modules/authentication/strategies/refre
 
 import { JwtAuthGuard } from '@shared/modules/authentication/guards/jwt-auth.guard';
 
-import { AuthService } from '@shared/modules/authentication/services/Auth.service';
+import { AuthService } from '@shared/modules/authentication/services/auth.service';
 
 import { UserRepository } from '@modules/users/repository/user.repository';
 import { BuyerRepository } from '@modules/buyers/repository/buyer.repository';
