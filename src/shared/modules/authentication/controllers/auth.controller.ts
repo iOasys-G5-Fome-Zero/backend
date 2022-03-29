@@ -2,7 +2,7 @@ import {
   Controller,
   Request,
   Post,
-  Get,
+  Put,
   Body,
   UseGuards,
   HttpCode,
@@ -72,7 +72,7 @@ export class AuthController {
 
   @UseGuards(RefreshTokenAuthGuard)
   @Public()
-  @Get('refresh')
+  @Put('refresh')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiCreatedResponse({
     type: User,
@@ -86,7 +86,7 @@ export class AuthController {
     return instanceToInstance(user);
   }
 
-  @Get('logout')
+  @Put('logout')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiCreatedResponse({
     type: User,

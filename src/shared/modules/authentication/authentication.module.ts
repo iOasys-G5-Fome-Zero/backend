@@ -6,9 +6,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BcryptProvider } from '@shared/providers/EncryptProvider/bcrypt.provider';
 import { CryptoProvider } from '@shared/providers/EncryptProvider/crypto.provider';
 
-import { LocalStrategy } from '@shared/modules/authentication/strategies/Local.strategy';
+import { LocalStrategy } from '@shared/modules/authentication/strategies/local.strategy';
 import { JwtStrategy } from '@shared/modules/authentication/strategies/jwt.strategy';
-import { RefreshStrategy } from '@shared/modules/authentication/strategies/Refresh.strategy';
+import { RefreshStrategy } from '@shared/modules/authentication/strategies/refresh.strategy';
 
 import { JwtAuthGuard } from '@shared/modules/authentication/guards/jwt-auth.guard';
 
