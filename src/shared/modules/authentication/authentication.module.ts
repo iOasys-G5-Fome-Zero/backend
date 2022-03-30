@@ -20,7 +20,7 @@ import { SellerRepository } from '@modules/sellers/repository/seller.repository'
 
 import { AuthController } from '@shared/modules/authentication/controllers/auth.controller';
 
-import { google, Auth } from 'googleapis';
+import { google } from 'googleapis';
 import envVariables from '@config/env';
 
 @Module({
@@ -40,7 +40,7 @@ import envVariables from '@config/env';
     { provide: 'APP_GUARD', useClass: JwtAuthGuard },
     {
       provide: 'GOOGLE_PROVIDER',
-      useFactory: async (): Promise<Auth.OAuth2Client> => {
+      useFactory: async (): Promise<any> => {
         return new google.auth.OAuth2(
           envVariables().googleClientID,
           envVariables().googleSecret,
