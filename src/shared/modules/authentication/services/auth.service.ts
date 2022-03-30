@@ -2,12 +2,12 @@ import { Injectable, Inject, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import envVariables from '@config/env';
-// import { v4 as uuidV4 } from 'uuid';
+import { v4 as uuidV4 } from 'uuid';
 
 import { PayloadDTO } from '@shared/dtos/authentication/payload.dto';
 import { LoginResponseDTO } from '@shared/dtos/authentication/loginResponse.dto';
 import { RefreshResponseDTO } from '@shared/dtos/authentication/refreshResponse.dto';
-// import { AuthWithGoogleDTO } from '@shared/dtos/authentication/authWithGoogle.dto';
+import { AuthWithGoogleDTO } from '@shared/dtos/authentication/authWithGoogle.dto';
 
 import { User } from '@shared/entities/user/user.entity';
 
@@ -17,62 +17,68 @@ import { BcryptProvider } from '@shared/providers/EncryptProvider/bcrypt.provide
 // import { CryptoProvider } from '@shared/providers/EncryptProvider/crypto.provider';
 
 import { UserRepository } from '@modules/users/repository/user.repository';
-// import { BuyerRepository } from '@modules/buyers/repository/buyer.repository';
-// import { SellerRepository } from '@modules/sellers/repository/seller.repository';
+import { BuyerRepository } from '@modules/buyers/repository/buyer.repository';
+import { SellerRepository } from '@modules/sellers/repository/seller.repository';
 
-// import { google, Auth } from 'googleapis';
+import { google } from 'googleapis';
 
 @Injectable()
 export class AuthService {
   constructor(
     // @Inject('CRYPTO_PROVIDER')
     // private readonly crypto: CryptoProvider,
-    // @InjectRepository(BuyerRepository)
-    // private readonly buyerRepository: BuyerRepository,
-    // @InjectRepository(SellerRepository)
-    // private readonly sellerRepository: SellerRepository,
     // @Inject('GOOGLE_PROVIDER')
     // private readonly oauthClient: Auth.OAuth2Client,
+    @InjectRepository(BuyerRepository)
+    private readonly buyerRepository: BuyerRepository,
+    @InjectRepository(SellerRepository)
+    private readonly sellerRepository: SellerRepository,
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
     @Inject('ENCRYPT_PROVIDER')
     private readonly encryption: BcryptProvider,
     private readonly jwtService: JwtService,
   ) {}
-  // async authenticateWithGoogle({
-  //   code,
-  //   userType,
-  // }: AuthWithGoogleDTO): Promise<LoginResponseDTO> {
-  //   try {
-  //     const { tokens } = await this.oauthClient.getToken(code);
-  //     const userData = await this.getUserData(tokens.access_token);
+  async authenticateWithGoogle({
+    code,
+    userType,
+  }: AuthWithGoogleDTO): Promise<LoginResponseDTO> {
+    try {
+      const oauthClient = new google.auth.OAuth2(
+        envVariables().googleClientID,
+        envVariables().googleSecret,
+        envVariables().googleRedirectURI,
+      );
 
-  //     let user = await this.userRepository.findUserByEmailOrPhone(
-  //       userData.email,
-  //     );
+      const { tokens } = await oauthClient.getToken(code);
+      const userData = await this.getUserData(oauthClient, tokens.access_token);
 
-  //     if (!user) {
-  //       user = await this.userRepository.createUser({
-  //         id: uuidV4(),
-  //         firstName: userData.name,
-  //         lastName: userData.family_name,
-  //         email: userData.email,
-  //         userType,
-  //       });
+      let user = await this.userRepository.findUserByEmailOrPhone(
+        userData.email,
+      );
 
-  //       const specialization = {
-  //         buyer: (user) => this.buyerRepository.createBuyer(user),
-  //         seller: (user) => this.sellerRepository.createSeller(user),
-  //       };
+      if (!user) {
+        user = await this.userRepository.createUser({
+          id: uuidV4(),
+          firstName: userData.name,
+          lastName: userData.family_name,
+          email: userData.email,
+          userType,
+        });
 
-  //       await specialization[user.userType]({ userID: user.id }); // create SPECIALIZATION
-  //     }
+        const specialization = {
+          buyer: (user) => this.buyerRepository.createBuyer(user),
+          seller: (user) => this.sellerRepository.createSeller(user),
+        };
 
-  //     return this.login(user);
-  //   } catch (error) {
-  //     throw new ConflictException('Invalid-request');
-  //   }
-  // }
+        await specialization[user.userType]({ userID: user.id }); // create SPECIALIZATION
+      }
+
+      return this.login(user);
+    } catch (error) {
+      throw new ConflictException('Invalid-request');
+    }
+  }
 
   async validateUser(
     phoneOrEmail: string,
@@ -191,15 +197,15 @@ export class AuthService {
     ];
   }
 
-  // private async getUserData(access_token: string) {
-  //   const userInfoClient = google.oauth2('v2').userinfo;
+  private async getUserData(oauthClient, access_token: string) {
+    const userInfoClient = google.oauth2('v2').userinfo;
 
-  //   this.oauthClient.setCredentials({ access_token });
+    oauthClient.setCredentials({ access_token });
 
-  //   const userInfoResponse = await userInfoClient.get({
-  //     auth: this.oauthClient,
-  //   });
+    const userInfoResponse = await userInfoClient.get({
+      auth: oauthClient,
+    });
 
-  //   return userInfoResponse.data;
-  // }
+    return userInfoResponse.data;
+  }
 }
