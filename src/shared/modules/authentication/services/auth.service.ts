@@ -42,7 +42,7 @@ export class AuthService {
   async authenticateWithGoogle({
     code,
     userType,
-  }: AuthWithGoogleDTO): Promise<LoginResponseDTO | User> {
+  }: AuthWithGoogleDTO): Promise<LoginResponseDTO> {
     try {
       const { tokens } = await this.oauthClient.getToken(code);
       const userData = await this.getUserData(tokens.access_token);
@@ -68,7 +68,7 @@ export class AuthService {
         await specialization[user.userType]({ userID: user.id }); // create SPECIALIZATION
       }
 
-      return user;
+      return this.login(user);
     } catch (error) {
       throw new ConflictException('Invalid-request');
     }
