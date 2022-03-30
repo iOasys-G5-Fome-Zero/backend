@@ -46,6 +46,5 @@ export class SellerRepository extends Repository<Seller> {
     } catch (error) {
       throw new ConflictException(unexpected(error.message));
     }
-    ('a');
   }
 }

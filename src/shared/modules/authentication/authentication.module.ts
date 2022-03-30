@@ -27,8 +27,8 @@ import envVariables from '@config/env';
   imports: [
     TypeOrmModule.forFeature([
       UserRepository,
-      BuyerRepository,
-      SellerRepository,
+      // BuyerRepository,
+      // SellerRepository,
     ]),
     BcryptProvider,
     // CryptoProvider,
@@ -38,16 +38,16 @@ import envVariables from '@config/env';
   providers: [
     { provide: 'ENCRYPT_PROVIDER', useClass: BcryptProvider },
     { provide: 'APP_GUARD', useClass: JwtAuthGuard },
-    {
-      provide: 'GOOGLE_PROVIDER',
-      useFactory: async (): Promise<Auth.OAuth2Client> => {
-        return new google.auth.OAuth2(
-          envVariables().googleClientID,
-          envVariables().googleSecret,
-          envVariables().googleRedirectURI,
-        );
-      },
-    },
+    // {
+    //   provide: 'GOOGLE_PROVIDER',
+    //   useFactory: async (): Promise<Auth.OAuth2Client> => {
+    //     return new google.auth.OAuth2(
+    //       envVariables().googleClientID,
+    //       envVariables().googleSecret,
+    //       envVariables().googleRedirectURI,
+    //     );
+    //   },
+    // },
     // { provide: 'CRYPTO_PROVIDER', useClass: CryptoProvider },
     AuthService,
     LocalStrategy,
