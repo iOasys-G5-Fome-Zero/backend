@@ -1,5 +1,5 @@
 import { EntityRepository, Repository } from 'typeorm';
-import { ConflictException, ConsoleLogger } from '@nestjs/common';
+import { ConflictException } from '@nestjs/common';
 
 import { CreateUserDTO } from '@shared/dtos/user/createUser.dto';
 import { EditUserDTO } from '@shared/dtos/user/editUser.dto';

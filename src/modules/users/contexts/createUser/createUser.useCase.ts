@@ -1,18 +1,15 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as uuidV4 } from 'uuid';
 
 import { BcryptProvider } from '@shared/providers/EncryptProvider/bcrypt.provider';
-import { CryptoProvider } from '@shared/providers/EncryptProvider/crypto.provider';
-
-import { alreadyExists } from '@shared/constants/errors';
+// import { CryptoProvider } from '@shared/providers/EncryptProvider/crypto.provider';
 
 import { UserRepository } from '@modules/users/repository/user.repository';
 import { SellerRepository } from '@modules/sellers/repository/seller.repository';
 import { BuyerRepository } from '@modules/buyers/repository/buyer.repository';
 
 import { CreateUserRequestBodyDTO } from '@shared/dtos/user/createUserRequestBody.dto';
-import { CreateUserDTO } from '@shared/dtos/user/createUser.dto';
 
 import { User } from '@shared/entities/user/user.entity';
 
@@ -25,10 +22,10 @@ export class CreateUserUseCase {
     private readonly buyerRepository: BuyerRepository,
     @InjectRepository(SellerRepository)
     private readonly sellerRepository: SellerRepository,
+    // @Inject('CRYPTO_PROVIDER')
+    // private readonly crypto: CryptoProvider,
     @Inject('ENCRYPT_PROVIDER')
     private readonly encryption: BcryptProvider,
-    @Inject('CRYPTO_PROVIDER')
-    private readonly crypto: CryptoProvider,
   ) {}
 
   async execute({

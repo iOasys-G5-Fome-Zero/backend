@@ -14,7 +14,7 @@ import { User } from '@shared/entities/user/user.entity';
 import { requestNotCompleted } from '@shared/constants/errors';
 
 import { BcryptProvider } from '@shared/providers/EncryptProvider/bcrypt.provider';
-import { CryptoProvider } from '@shared/providers/EncryptProvider/crypto.provider';
+// import { CryptoProvider } from '@shared/providers/EncryptProvider/crypto.provider';
 
 import { UserRepository } from '@modules/users/repository/user.repository';
 import { BuyerRepository } from '@modules/buyers/repository/buyer.repository';
@@ -28,8 +28,8 @@ export class AuthService {
   constructor(
     @Inject('ENCRYPT_PROVIDER')
     private readonly encryption: BcryptProvider,
-    @Inject('CRYPTO_PROVIDER')
-    private readonly crypto: CryptoProvider,
+    // @Inject('CRYPTO_PROVIDER')
+    // private readonly crypto: CryptoProvider,
     private readonly jwtService: JwtService,
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
@@ -78,7 +78,7 @@ export class AuthService {
     phoneOrEmail: string,
     password: string,
   ): Promise<User | null> {
-    const encryptedPhoneOrEmail = this.crypto.encrypt(phoneOrEmail);
+    // const encryptedPhoneOrEmail = this.crypto.encrypt(phoneOrEmail);
 
     const user = await this.userRepository.findUserByEmailOrPhone(phoneOrEmail);
 

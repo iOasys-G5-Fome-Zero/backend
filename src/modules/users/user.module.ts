@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { BcryptProvider } from '@shared/providers/EncryptProvider/bcrypt.provider';
-import { CryptoProvider } from '@shared/providers/EncryptProvider/crypto.provider';
+// import { CryptoProvider } from '@shared/providers/EncryptProvider/crypto.provider';
 
 import { CreateUserController } from './contexts/createUser/createUser.controller';
 
@@ -20,11 +20,11 @@ import { BuyerRepository } from '@modules/buyers/repository/buyer.repository';
       BuyerRepository,
     ]),
     BcryptProvider,
-    CryptoProvider,
+    // CryptoProvider,
   ],
   providers: [
     { provide: 'ENCRYPT_PROVIDER', useClass: BcryptProvider },
-    { provide: 'CRYPTO_PROVIDER', useClass: CryptoProvider },
+    // { provide: 'CRYPTO_PROVIDER', useClass: CryptoProvider },
     CreateUserUseCase,
   ],
   controllers: [CreateUserController],
