@@ -20,8 +20,8 @@ import { SellerRepository } from '@modules/sellers/repository/seller.repository'
 
 import { AuthController } from '@shared/modules/authentication/controllers/auth.controller';
 
-// import { google, Auth } from 'googleapis';
-// import envVariables from '@config/env';
+import { google, Auth } from 'googleapis';
+import envVariables from '@config/env';
 
 @Module({
   imports: [
@@ -38,16 +38,16 @@ import { AuthController } from '@shared/modules/authentication/controllers/auth.
   providers: [
     { provide: 'ENCRYPT_PROVIDER', useClass: BcryptProvider },
     { provide: 'APP_GUARD', useClass: JwtAuthGuard },
-    // {
-    //   provide: 'GOOGLE_PROVIDER',
-    //   useFactory: async (): Promise<Auth.OAuth2Client> => {
-    //     return new google.auth.OAuth2(
-    //       envVariables().googleClientID,
-    //       envVariables().googleSecret,
-    //       envVariables().googleRedirectURI,
-    //     );
-    //   },
-    // },
+    {
+      provide: 'GOOGLE_PROVIDER',
+      useFactory: async (): Promise<Auth.OAuth2Client> => {
+        return new google.auth.OAuth2(
+          envVariables().googleClientID,
+          envVariables().googleSecret,
+          envVariables().googleRedirectURI,
+        );
+      },
+    },
     // { provide: 'CRYPTO_PROVIDER', useClass: CryptoProvider },
     AuthService,
     LocalStrategy,
