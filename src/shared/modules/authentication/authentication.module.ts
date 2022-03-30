@@ -21,7 +21,7 @@ import { SellerRepository } from '@modules/sellers/repository/seller.repository'
 import { AuthController } from '@shared/modules/authentication/controllers/auth.controller';
 
 import { google, Auth } from 'googleapis';
-import envVariables from '@config/env';
+// import envVariables from '@config/env';
 
 @Module({
   imports: [
