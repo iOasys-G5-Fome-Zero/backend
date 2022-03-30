@@ -33,7 +33,6 @@ import envVariables from '@config/env';
     BcryptProvider,
     // CryptoProvider,
     PassportModule,
-    google.auth.OAuth2,
     JwtModule.register({}),
   ],
   providers: [
