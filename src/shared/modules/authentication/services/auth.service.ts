@@ -45,29 +45,28 @@ export class AuthService {
   }: AuthWithGoogleDTO): Promise<LoginResponseDTO> {
     try {
       const { tokens } = await this.oauthClient.getToken(code);
-      // const userData = await this.getUserData(tokens.access_token);
-      const userData = { name: 'adf', email: 'asdf', family_name: 'asdf' };
+      const userData = await this.getUserData(tokens.access_token);
 
-      let user = await this.userRepository.findUserByEmailOrPhone(
+      const user = await this.userRepository.findUserByEmailOrPhone(
         userData.email,
       );
 
-      if (!user) {
-        user = await this.userRepository.createUser({
-          id: uuidV4(),
-          firstName: userData.name,
-          lastName: userData.family_name,
-          email: userData.email,
-          userType,
-        });
+      // if (!user) {
+      //   user = await this.userRepository.createUser({
+      //     id: uuidV4(),
+      //     firstName: userData.name,
+      //     lastName: userData.family_name,
+      //     email: userData.email,
+      //     userType,
+      //   });
 
-        const specialization = {
-          buyer: (user) => this.buyerRepository.createBuyer(user),
-          seller: (user) => this.sellerRepository.createSeller(user),
-        };
+      //   const specialization = {
+      //     buyer: (user) => this.buyerRepository.createBuyer(user),
+      //     seller: (user) => this.sellerRepository.createSeller(user),
+      //   };
 
-        await specialization[user.userType]({ userID: user.id }); // create SPECIALIZATION
-      }
+      //   await specialization[user.userType]({ userID: user.id }); // create SPECIALIZATION
+      // }
 
       return this.login(user);
     } catch (error) {
