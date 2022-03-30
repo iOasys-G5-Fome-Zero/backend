@@ -21,7 +21,7 @@ import { SellerRepository } from '@modules/sellers/repository/seller.repository'
 import { AuthController } from '@shared/modules/authentication/controllers/auth.controller';
 
 import { google, Auth } from 'googleapis';
-// import envVariables from '@config/env';
+import envVariables from '@config/env';
 
 @Module({
   imports: [
@@ -41,10 +41,10 @@ import { google, Auth } from 'googleapis';
     {
       provide: 'GOOGLE_PROVIDER',
       useFactory: async (): Promise<Auth.OAuth2Client> => {
-        return new google.auth.OAuth2(
-          '381358836282-e43l8cspu1jva3m7jlcsuoldjd64ilec.apps.googleusercontent.com',
-          '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',
-          'http://localhost:3000/auth/google-redirect',
+        return new Auth.OAuth2Client(
+          envVariables().googleClientID,
+          envVariables().googleSecret,
+          envVariables().googleRedirectURI,
         );
       },
     },
