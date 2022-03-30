@@ -24,8 +24,8 @@ import { google, Auth } from 'googleapis';
 
 @Injectable()
 export class AuthService {
-  oauthClient: Auth.OAuth2Client;
   constructor(
+    private readonly oauthClient: Auth.OAuth2Client,
     @Inject('ENCRYPT_PROVIDER')
     private readonly encryption: BcryptProvider,
     // @Inject('CRYPTO_PROVIDER')
