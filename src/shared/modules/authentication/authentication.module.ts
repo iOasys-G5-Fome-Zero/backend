@@ -42,9 +42,9 @@ import envVariables from '@config/env';
       provide: 'GOOGLE_PROVIDER',
       useFactory: async (): Promise<Auth.OAuth2Client> => {
         return new google.auth.OAuth2(
-          envVariables().googleClientID,
-          envVariables().googleSecret,
-          envVariables().googleRedirectURI,
+          '381358836282-e43l8cspu1jva3m7jlcsuoldjd64ilec.apps.googleusercontent.com',
+          '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',
+          'http://localhost:3000/auth/google-redirect',
         );
       },
     },
