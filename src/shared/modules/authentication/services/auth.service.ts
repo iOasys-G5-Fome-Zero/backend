@@ -20,12 +20,13 @@ import { UserRepository } from '@modules/users/repository/user.repository';
 import { BuyerRepository } from '@modules/buyers/repository/buyer.repository';
 import { SellerRepository } from '@modules/sellers/repository/seller.repository';
 
-// import { google, Auth } from 'googleapis';
+import { google, Auth } from 'googleapis';
 
 @Injectable()
 export class AuthService {
   constructor(
-    // private readonly oauthClient: Auth.OAuth2Client,
+    @Inject('GOOGLE_PROVIDER')
+    private readonly oauthClient: Auth.OAuth2Client,
     @Inject('ENCRYPT_PROVIDER')
     private readonly encryption: BcryptProvider,
     // @Inject('CRYPTO_PROVIDER')
@@ -37,42 +38,41 @@ export class AuthService {
     private readonly buyerRepository: BuyerRepository,
     @InjectRepository(SellerRepository)
     private readonly sellerRepository: SellerRepository,
-  ) {
-    // this.oauthClient = new google.auth.OAuth2(
-    //   envVariables().googleClientID,
-    //   envVariables().googleSecret,
-    //   envVariables().googleRedirectURI,
-    // );
+  ) {}
+  async authenticateWithGoogle({
+    code,
+    userType,
+  }: AuthWithGoogleDTO): Promise<LoginResponseDTO> {
+    try {
+      const { tokens } = await this.oauthClient.getToken(code);
+      const userData = await this.getUserData(tokens.access_token);
+
+      let user = await this.userRepository.findUserByEmailOrPhone(
+        userData.email,
+      );
+
+      if (!user) {
+        user = await this.userRepository.createUser({
+          id: uuidV4(),
+          firstName: userData.name,
+          lastName: userData.family_name,
+          email: userData.email,
+          userType,
+        });
+
+        const specialization = {
+          buyer: (user) => this.buyerRepository.createBuyer(user),
+          seller: (user) => this.sellerRepository.createSeller(user),
+        };
+
+        await specialization[user.userType]({ userID: user.id }); // create SPECIALIZATION
+      }
+
+      return this.login(user);
+    } catch (error) {
+      throw new ConflictException('Invalid-request');
+    }
   }
-
-  // async authenticateWithGoogle({
-  //   code,
-  //   userType,
-  // }: AuthWithGoogleDTO): Promise<LoginResponseDTO> {
-  //   const { tokens } = await this.oauthClient.getToken(code);
-  //   const userData = await this.getUserData(tokens.access_token);
-
-  //   let user = await this.userRepository.findUserByEmailOrPhone(userData.email);
-
-  //   if (!user) {
-  //     user = await this.userRepository.createUser({
-  //       id: uuidV4(),
-  //       firstName: userData.name,
-  //       lastName: userData.family_name,
-  //       email: userData.email,
-  //       userType,
-  //     });
-
-  //     const specialization = {
-  //       buyer: (user) => this.buyerRepository.createBuyer(user),
-  //       seller: (user) => this.sellerRepository.createSeller(user),
-  //     };
-
-  //     await specialization[user.userType]({ userID: user.id }); // create SPECIALIZATION
-  //   }
-
-  //   return this.login(user);
-  // }
 
   async validateUser(
     phoneOrEmail: string,
@@ -191,15 +191,15 @@ export class AuthService {
     ];
   }
 
-  // private async getUserData(access_token: string) {
-  //   const userInfoClient = google.oauth2('v2').userinfo;
+  private async getUserData(access_token: string) {
+    const userInfoClient = google.oauth2('v2').userinfo;
 
-  //   this.oauthClient.setCredentials({ access_token });
+    this.oauthClient.setCredentials({ access_token });
 
-  //   const userInfoResponse = await userInfoClient.get({
-  //     auth: this.oauthClient,
-  //   });
+    const userInfoResponse = await userInfoClient.get({
+      auth: this.oauthClient,
+    });
 
-  //   return userInfoResponse.data;
-  // }
+    return userInfoResponse.data;
+  }
 }

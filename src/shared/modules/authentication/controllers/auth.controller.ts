@@ -29,26 +29,26 @@ import { RefreshTokenAuthGuard } from '@shared/modules/authentication/guards/ref
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // @Post('google-auth')
-  // @Public()
-  // @HttpCode(HttpStatus.ACCEPTED)
-  // @ApiCreatedResponse({
-  //   type: User,
-  // })
-  // @ApiBadRequestResponse({
-  //   description: 'Bad Request',
-  // })
-  // async googleAuth(
-  //   @Body() authWithGoogleDTO: AuthWithGoogleDTO,
-  //   @Request() req,
-  // ) {
-  //   const response = await this.authService.authenticateWithGoogle(
-  //     authWithGoogleDTO,
-  //   );
-  //   const { accessCookie, refreshCookie } = response;
-  //   req.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
-  //   return instanceToInstance(response.user);
-  // }
+  @Post('google-auth')
+  @Public()
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiCreatedResponse({
+    type: User,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+  })
+  async googleAuth(
+    @Body() authWithGoogleDTO: AuthWithGoogleDTO,
+    @Request() req,
+  ) {
+    const response = await this.authService.authenticateWithGoogle(
+      authWithGoogleDTO,
+    );
+    const { accessCookie, refreshCookie } = response;
+    req.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
+    return instanceToInstance(response.user);
+  }
 
   @UseGuards(LocalAuthGuard)
   @Public()
