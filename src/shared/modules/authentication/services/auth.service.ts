@@ -25,8 +25,8 @@ import { google, Auth } from 'googleapis';
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject('GOOGLE_PROVIDER')
-    private readonly oauthClient: Auth.OAuth2Client,
+    // @Inject('GOOGLE_PROVIDER')
+    // private readonly oauthClient: Auth.OAuth2Client,
     @Inject('ENCRYPT_PROVIDER')
     private readonly encryption: BcryptProvider,
     // @Inject('CRYPTO_PROVIDER')
@@ -44,19 +44,19 @@ export class AuthService {
     userType,
   }: AuthWithGoogleDTO): Promise<LoginResponseDTO> {
     try {
-      const { tokens } = await this.oauthClient.getToken(code);
-      const userData = await this.getUserData(tokens.access_token);
+      // const { tokens } = await this.oauthClient.getToken(code);
+      // const userData = await this.getUserData(tokens.access_token);
 
       let user = await this.userRepository.findUserByEmailOrPhone(
-        userData.email,
+        'userData.email',
       );
 
       if (!user) {
         user = await this.userRepository.createUser({
           id: uuidV4(),
-          firstName: userData.name,
-          lastName: userData.family_name,
-          email: userData.email,
+          firstName: 'userData.name',
+          lastName: 'userData.family_name',
+          email: 'userData.email',
           userType,
         });
 
@@ -194,12 +194,12 @@ export class AuthService {
   private async getUserData(access_token: string) {
     const userInfoClient = google.oauth2('v2').userinfo;
 
-    this.oauthClient.setCredentials({ access_token });
+    // this.oauthClient.setCredentials({ access_token });
 
-    const userInfoResponse = await userInfoClient.get({
-      auth: this.oauthClient,
-    });
+    // const userInfoResponse = await userInfoClient.get({
+    //   auth: this.oauthClient,
+    // });
 
-    return userInfoResponse.data;
+    return 'userInfoResponse.data';
   }
 }
