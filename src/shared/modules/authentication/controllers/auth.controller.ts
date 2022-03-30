@@ -45,9 +45,9 @@ export class AuthController {
     const response = await this.authService.authenticateWithGoogle(
       authWithGoogleDTO,
     );
-    const { accessCookie, refreshCookie } = response;
-    req.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
-    return instanceToInstance(response.user);
+    // const { accessCookie, refreshCookie } = response;
+    // req.res.setHeader('Set-Cookie', [accessCookie, refreshCookie]);
+    return instanceToInstance(response);
   }
 
   @UseGuards(LocalAuthGuard)
