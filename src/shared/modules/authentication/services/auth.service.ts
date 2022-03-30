@@ -45,7 +45,8 @@ export class AuthService {
   }: AuthWithGoogleDTO): Promise<LoginResponseDTO> {
     try {
       const { tokens } = await this.oauthClient.getToken(code);
-      const userData = await this.getUserData(tokens.access_token);
+      // const userData = await this.getUserData(tokens.access_token);
+      const userData = { name: 'adf', email: 'asdf', family_name: 'asdf' };
 
       let user = await this.userRepository.findUserByEmailOrPhone(
         userData.email,
