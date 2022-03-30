@@ -38,11 +38,11 @@ export class AuthService {
     @InjectRepository(SellerRepository)
     private readonly sellerRepository: SellerRepository,
   ) {
-    this.oauthClient = new google.auth.OAuth2(
-      envVariables().googleClientID,
-      envVariables().googleSecret,
-      envVariables().googleRedirectURI,
-    );
+    // this.oauthClient = new google.auth.OAuth2(
+    //   envVariables().googleClientID,
+    //   envVariables().googleSecret,
+    //   envVariables().googleRedirectURI,
+    // );
   }
 
   async authenticateWithGoogle({
