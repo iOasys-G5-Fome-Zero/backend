@@ -3,7 +3,7 @@ import { ConflictException } from '@nestjs/common';
 
 import { Basket } from '@shared/entities/basket/basket.entity';
 
-import { CreateBasketDTO } from '@shared/dtos/Basket/createBasket.dto';
+import { CreateBasketDTO } from '@shared/dtos/basket/createBasket.dto';
 
 import { unexpected } from '@shared/constants/errors';
 
