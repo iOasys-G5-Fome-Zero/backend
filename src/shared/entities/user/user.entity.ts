@@ -11,7 +11,7 @@ import {
   Check,
 } from 'typeorm';
 
-import { UserType } from '@shared/entities/user/usersType.entity';
+import { UserType } from '@shared/entities/user/usersType.enum';
 
 @Entity('users')
 @Unique(['cpf', 'email', 'phone', 'token', 'refreshToken'])

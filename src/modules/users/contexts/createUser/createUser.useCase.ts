@@ -6,8 +6,8 @@ import { BcryptProvider } from '@shared/providers/EncryptProvider/bcrypt.provide
 // import { CryptoProvider } from '@shared/providers/EncryptProvider/crypto.provider';
 
 import { UserRepository } from '@modules/users/repository/user.repository';
-import { SellerRepository } from '@modules/sellers/repository/seller.repository';
-import { BuyerRepository } from '@modules/buyers/repository/buyer.repository';
+import { ProducerRepository } from '@modules/producers/repository/producer.repository';
+import { ConsumerRepository } from '@modules/consumers/repository/consumer.repository';
 
 import { CreateUserRequestBodyDTO } from '@shared/dtos/user/createUserRequestBody.dto';
 
@@ -18,10 +18,10 @@ export class CreateUserUseCase {
   constructor(
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
-    @InjectRepository(BuyerRepository)
-    private readonly buyerRepository: BuyerRepository,
-    @InjectRepository(SellerRepository)
-    private readonly sellerRepository: SellerRepository,
+    @InjectRepository(ConsumerRepository)
+    private readonly consumerRepository: ConsumerRepository,
+    @InjectRepository(ProducerRepository)
+    private readonly producerRepository: ProducerRepository,
     // @Inject('CRYPTO_PROVIDER')
     // private readonly crypto: CryptoProvider,
     @Inject('ENCRYPT_PROVIDER')
@@ -49,8 +49,8 @@ export class CreateUserUseCase {
     });
 
     const specialization = {
-      buyer: (user) => this.buyerRepository.createBuyer(user),
-      seller: (user) => this.sellerRepository.createSeller(user),
+      consumer: (user) => this.consumerRepository.createConsumer(user),
+      producer: (user) => this.producerRepository.createProducer(user),
     };
 
     await specialization[user.userType]({ userID: user.id }); // create SPECIALIZATION

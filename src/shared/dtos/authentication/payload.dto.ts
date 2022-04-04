@@ -1,4 +1,4 @@
-import { UserType } from '@shared/entities/user/usersType.entity';
+import { UserType } from '@shared/entities/user/usersType.enum';
 
 export class PayloadDTO {
   public id: string;

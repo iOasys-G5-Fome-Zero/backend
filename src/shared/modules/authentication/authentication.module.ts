@@ -15,8 +15,8 @@ import { JwtAuthGuard } from '@shared/modules/authentication/guards/jwt-auth.gua
 import { AuthService } from '@shared/modules/authentication/services/auth.service';
 
 import { UserRepository } from '@modules/users/repository/user.repository';
-import { BuyerRepository } from '@modules/buyers/repository/buyer.repository';
-import { SellerRepository } from '@modules/sellers/repository/seller.repository';
+// import { ConsumerRepository } from '@modules/consumers/repository/consumer.repository';
+// import { ProducerRepository } from '@modules/producers/repository/producer.repository';
 
 import { AuthController } from '@shared/modules/authentication/controllers/auth.controller';
 
@@ -27,8 +27,8 @@ import { AuthController } from '@shared/modules/authentication/controllers/auth.
   imports: [
     TypeOrmModule.forFeature([
       UserRepository,
-      BuyerRepository,
-      SellerRepository,
+      // ConsumerRepository,
+      // ProducerRepository,
     ]),
     BcryptProvider,
     // CryptoProvider,

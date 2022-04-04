@@ -9,15 +9,15 @@ import { CreateUserController } from './contexts/createUser/createUser.controlle
 import { CreateUserUseCase } from './contexts/createUser/createUser.useCase';
 
 import { UserRepository } from '@modules/users/repository/user.repository';
-import { SellerRepository } from '@modules/sellers/repository/seller.repository';
-import { BuyerRepository } from '@modules/buyers/repository/buyer.repository';
+import { ProducerRepository } from '@modules/producers/repository/producer.repository';
+import { ConsumerRepository } from '@modules/consumers/repository/consumer.repository';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       UserRepository,
-      SellerRepository,
-      BuyerRepository,
+      ProducerRepository,
+      ConsumerRepository,
     ]),
     BcryptProvider,
     // CryptoProvider,

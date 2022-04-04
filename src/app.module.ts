@@ -7,8 +7,10 @@ import { AuthenticationModule } from '@shared/modules/authentication/authenticat
 import { AuthorizationModule } from '@shared/modules/authorization/authorization.module';
 
 import { UserModule } from '@modules/users/user.module';
-import { BuyerModule } from '@modules/buyers/buyer.module';
-import { SellerModule } from '@modules/sellers/seller.module';
+import { ConsumerModule } from '@modules/consumers/consumer.module';
+import { ProducerModule } from '@modules/producers/producer.module';
+import { FoodModule } from '@modules/foods/food.module';
+import { BasketModule } from '@modules/baskets/basket.module';
 
 import {
   WinstonModule,
@@ -36,8 +38,10 @@ import * as winston from 'winston';
     AuthenticationModule,
     AuthorizationModule,
     UserModule,
-    BuyerModule,
-    SellerModule,
+    ConsumerModule,
+    ProducerModule,
+    FoodModule,
+    BasketModule,
   ],
   controllers: [],
   providers: [],

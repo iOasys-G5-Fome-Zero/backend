@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsEnum } from 'class-validator';
 
-import { UserType } from '@shared/entities/user/usersType.entity';
+import { UserType } from '@shared/entities/user/usersType.enum';
 
 export class AuthWithGoogleDTO {
   @ApiProperty()

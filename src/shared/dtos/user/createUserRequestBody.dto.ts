@@ -10,7 +10,7 @@ import {
   IsEnum,
 } from 'class-validator';
 
-import { UserType } from '@shared/entities/user/usersType.entity';
+import { UserType } from '@shared/entities/user/usersType.enum';
 
 const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[`~!@#$%^&*=(+){}|'";\\:[><.\],?/-]).{8,}$/;
@@ -28,7 +28,10 @@ export class CreateUserRequestBodyDTO {
   @Length(3, 50)
   public lastName: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    enum: UserType,
+    example: [UserType.consumer, UserType.producer],
+  })
   @IsString()
   @IsNotEmpty()
   @IsEnum(UserType)

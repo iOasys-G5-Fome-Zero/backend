@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class UsersTable1644671447604 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-        CREATE TYPE user_type AS ENUM ('buyer','seller');
+        CREATE TYPE user_type AS ENUM ('consumer','producer');
         CREATE TABLE users (
             id varchar(255) PRIMARY KEY,
             first_name varchar(255) NOT NULL,
@@ -26,7 +26,8 @@ export class UsersTable1644671447604 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
       `ALTER TABLE users DROP CONSTRAINT email_or_phone_null;
-       DROP TABLE users; DROP TYPE user_type`,
+       DROP TABLE users CASCADE; 
+       DROP TYPE user_type;`,
     );
   }
 }
