@@ -3,5 +3,7 @@ export class CreateFoodDTO {
 
   public name: string;
 
+  public imageUrl?: string;
+
   public priceWeight: number;
 }

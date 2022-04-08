@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConsumerRepository } from '@modules/consumers/repository/consumer.repository';
 import { BasketFoodRepository } from '@modules/foods/repository/basketFoods.repository';
 import { RemovedFoodsRepository } from '@modules/consumers/repository/removedFoods.repository';
+import { ProducerRepository } from '@modules/producers/repository/producer.repository';
 
 import { Consumer } from '@shared/entities/consumer/consumer.entity';
 
@@ -12,6 +13,8 @@ export class AddCoinsUseCase {
   constructor(
     @InjectRepository(ConsumerRepository)
     private readonly consumerRepository: ConsumerRepository,
+    @InjectRepository(ProducerRepository)
+    private readonly producerRepository: ProducerRepository,
     @InjectRepository(BasketFoodRepository)
     private readonly basketFoodRepository: BasketFoodRepository,
     @InjectRepository(RemovedFoodsRepository)
@@ -37,16 +40,19 @@ export class AddCoinsUseCase {
       0,
     );
 
+    const basketValue = consumerBasket.basketID.value;
+
     const coins = removedFoods.reduce(
       (sum, removedFood) =>
         sum +
-        (removedFood.quantity *
-          removedFood.foodID.priceWeight *
-          consumerBasket.basketID.value) /
+        (removedFood.quantity * removedFood.foodID.priceWeight * basketValue) /
           totalWeight,
       0,
     );
 
+    const producerID = consumerBasket.basketProducerID.userID.id;
+
+    await this.producerRepository.addToBalance(producerID, basketValue);
     const consumer = await this.consumerRepository.handleCoins(
       consumerID,
       Math.round(coins),

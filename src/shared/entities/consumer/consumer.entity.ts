@@ -35,6 +35,6 @@ export class Consumer {
   public cryptoCoins: number;
 
   @ApiProperty()
-  @Column({ name: 'credited' })
-  public credited: boolean;
+  @Column({ name: 'receipt_url' })
+  public receiptUrl: string;
 }

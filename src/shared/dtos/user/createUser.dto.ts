@@ -5,7 +5,7 @@ export class CreateUserDTO {
 
   public firstName: string;
 
-  public lastName: string;
+  public lastName?: string;
 
   public userType: UserType;
 

@@ -23,6 +23,10 @@ export class Food {
   public name: string;
 
   @ApiProperty()
+  @Column({ name: 'image_url' })
+  public imageUrl: string;
+
+  @ApiProperty()
   @Column({ name: 'price_weight' })
   public priceWeight: number;
 

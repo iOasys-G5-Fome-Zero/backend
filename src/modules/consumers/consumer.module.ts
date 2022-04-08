@@ -11,6 +11,8 @@ import { DeleteRemovedFoodsController } from '@modules/consumers/contexts/delete
 import { GetRemovedFoodsController } from '@modules/consumers/contexts/getRemovedFoods/GetRemovedFoods.controller';
 import { AddCoinsController } from '@modules/consumers/contexts/addCoins/addCoins.controller';
 import { SubtractCoinsController } from '@modules/consumers/contexts/subtractCoins/subtractCoins.controller';
+import { UploadReceiptController } from '@modules/consumers/contexts/uploadReceipt/uploadReceipt.controller';
+import { GetCryptoBalanceController } from '@modules/consumers/contexts/getCryptoBalance/getCryptoBalance.controller';
 
 import { GetConsumerUseCase } from '@modules/consumers/contexts/getConsumer/getConsumer.useCase';
 import { GetConsumerBasketUseCase } from '@modules/consumers/contexts/getConsumerBasket/getConsumerBasket.useCase';
@@ -20,8 +22,11 @@ import { DeleteRemovedFoodsUseCase } from '@modules/consumers/contexts/deleteRem
 import { GetRemovedFoodsUseCase } from '@modules/consumers/contexts/getRemovedFoods/GetRemovedFoods.useCase';
 import { AddCoinsUseCase } from '@modules/consumers/contexts/addCoins/addCoins.useCase';
 import { SubtractCoinsUseCase } from '@modules/consumers/contexts/subtractCoins/subtractCoins.useCase';
+import { UploadReceiptUseCase } from '@modules/consumers/contexts/uploadReceipt/uploadReceipt.useCase';
+import { GetCryptoBalanceUseCase } from '@modules/consumers/contexts/getCryptoBalance/getCryptoBalance.useCase';
 
 import { ConsumerRepository } from '@modules/consumers/repository/consumer.repository';
+import { ProducerRepository } from '@modules/producers/repository/producer.repository';
 import { RemovedFoodsRepository } from '@modules/consumers/repository/removedFoods.repository';
 import { BasketFoodRepository } from '@modules/foods/repository/basketFoods.repository';
 
@@ -29,6 +34,7 @@ import { BasketFoodRepository } from '@modules/foods/repository/basketFoods.repo
   imports: [
     TypeOrmModule.forFeature([
       ConsumerRepository,
+      ProducerRepository,
       RemovedFoodsRepository,
       BasketFoodRepository,
     ]),
@@ -44,6 +50,8 @@ import { BasketFoodRepository } from '@modules/foods/repository/basketFoods.repo
     GetRemovedFoodsUseCase,
     AddCoinsUseCase,
     SubtractCoinsUseCase,
+    UploadReceiptUseCase,
+    GetCryptoBalanceUseCase,
   ],
   controllers: [
     GetConsumerController,
@@ -54,6 +62,8 @@ import { BasketFoodRepository } from '@modules/foods/repository/basketFoods.repo
     GetRemovedFoodsController,
     AddCoinsController,
     SubtractCoinsController,
+    UploadReceiptController,
+    GetCryptoBalanceController,
   ],
 })
 export class ConsumerModule {}

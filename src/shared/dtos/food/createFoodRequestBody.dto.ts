@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsNotEmpty, IsString, Length, Min } from 'class-validator';
+import { IsNotEmpty, IsString, Length, IsNumberString } from 'class-validator';
 
 export class CreateFoodRequestBodyDTO {
   @ApiProperty()
@@ -9,8 +9,7 @@ export class CreateFoodRequestBodyDTO {
   public name: string;
 
   @ApiProperty()
-  @IsNumber()
+  @IsNumberString()
   @IsNotEmpty()
-  @Min(1)
-  public priceWeight: number;
+  public priceWeight: string;
 }

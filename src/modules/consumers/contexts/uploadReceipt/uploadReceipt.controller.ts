@@ -1,13 +1,15 @@
 import {
-  Body,
   Controller,
   HttpCode,
   HttpStatus,
   Post,
-  UploadedFile,
+  Request,
   UseInterceptors,
+  UploadedFile,
   ConflictException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -15,29 +17,24 @@ import {
   ApiConsumes,
   ApiBody,
 } from '@nestjs/swagger';
-import { Express } from 'express';
 
-import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadReceiptUseCase } from '@modules/consumers/contexts/uploadReceipt/uploadReceipt.useCase';
 
-import { CreateFoodRequestBodyDTO } from '@shared/dtos/food/createFoodRequestBody.dto';
-
-import { Food } from '@shared/entities/food/food.entity';
+import { Consumer } from '@shared/entities/consumer/consumer.entity';
 
 import { instanceToInstance } from 'class-transformer';
-
-import { CreateFoodUseCase } from '@modules/foods/contexts/createFood/createFood.useCase';
 
 import { Roles } from '@shared/decorators/roles.decorator';
 
 import { UserType } from '@shared/entities/user/usersType.enum';
 
-@ApiTags('Foods')
-@Controller('foods/new-food')
-export class CreateFoodController {
-  constructor(private readonly createFoodUseCase: CreateFoodUseCase) {}
+@ApiTags('Consumers')
+@Controller('consumers/receipt')
+export class UploadReceiptController {
+  constructor(private readonly uploadReceiptUseCase: UploadReceiptUseCase) {}
 
-  @Post()
-  @Roles(UserType.producer)
+  @Post('upload')
+  @Roles(UserType.consumer)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -65,30 +62,21 @@ export class CreateFoodController {
           type: 'string',
           format: 'binary',
         },
-        name: {
-          type: 'string',
-        },
-        priceWeight: {
-          type: 'string',
-        },
       },
     },
   })
-  @HttpCode(HttpStatus.CREATED)
+  @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({
-    type: Food,
+    type: Consumer,
   })
   @ApiBadRequestResponse({
     description: 'Bad Request',
   })
-  public async create(
+  public async execute(
     @UploadedFile() file: Express.Multer.File,
-    @Body() createFoodRequestBodyDTO: CreateFoodRequestBodyDTO,
+    @Request() req,
   ) {
-    const food = await this.createFoodUseCase.execute(
-      file,
-      createFoodRequestBodyDTO,
-    );
-    return instanceToInstance(food);
+    const consumer = await this.uploadReceiptUseCase.execute(file, req.user.id);
+    return instanceToInstance(consumer);
   }
 }

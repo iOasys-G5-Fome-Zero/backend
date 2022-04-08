@@ -51,7 +51,7 @@ export class FoodRepository extends Repository<Food> {
         .softDelete()
         .from(Food)
         .where('id = :id', { id })
-        .returning('id, name, price_weight')
+        .returning('id, name, image_url, price_weight')
         .execute();
       return response.raw[0];
     } catch (error) {
@@ -65,7 +65,7 @@ export class FoodRepository extends Repository<Food> {
         .softDelete()
         .from(Food)
         .where('name = :name', { name })
-        .returning('id, name, price_weight')
+        .returning('id, name, image_url,price_weight')
         .execute();
       return response.raw[0];
     } catch (error) {

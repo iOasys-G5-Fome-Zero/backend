@@ -6,6 +6,7 @@ export class FoodsTable1648666358537 implements MigrationInterface {
     CREATE TABLE foods (
         id varchar(255) PRIMARY KEY,
         name varchar(255) NOT NULL UNIQUE,
+        image_url varchar(255) NULL,
         price_weight int NOT NULL,
         created_at timestamp DEFAULT CURRENT_TIMESTAMP,
         updated_at timestamp DEFAULT CURRENT_TIMESTAMP,

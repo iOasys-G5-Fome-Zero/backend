@@ -8,6 +8,7 @@ import {
   IsNumberString,
   ValidateIf,
   IsEnum,
+  IsOptional,
 } from 'class-validator';
 
 import { UserType } from '@shared/entities/user/usersType.enum';
@@ -26,6 +27,7 @@ export class CreateUserRequestBodyDTO {
   @IsString()
   @IsNotEmpty()
   @Length(3, 50)
+  @IsOptional()
   public lastName: string;
 
   @ApiProperty({

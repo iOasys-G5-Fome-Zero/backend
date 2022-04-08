@@ -12,6 +12,35 @@ import { unexpected } from '@shared/constants/errors';
 
 @EntityRepository(Consumer)
 export class ConsumerRepository extends Repository<Consumer> {
+  async getCryptoBalance(id: string): Promise<Consumer> {
+    try {
+      const consumer = await this.findOne({
+        where: { userID: { id } },
+        select: ['cryptoCoins'],
+      });
+      return consumer;
+    } catch (error) {
+      throw new ConflictException(unexpected(error.message));
+    }
+  }
+
+  async handleReceipt(
+    userID: string,
+    receiptUrl: string = null,
+  ): Promise<Consumer> {
+    try {
+      const response = await this.createQueryBuilder('consumers')
+        .update<Consumer>(Consumer, { receiptUrl })
+        .where('userID = :userID', { userID })
+        .returning('*')
+        .updateEntity(true)
+        .execute();
+      return response.raw[0];
+    } catch (error) {
+      throw new ConflictException(unexpected(error.message));
+    }
+  }
+
   async handleCoins(userID: string, coins: number): Promise<Consumer> {
     try {
       const response = await this.createQueryBuilder('consumers')
@@ -31,8 +60,9 @@ export class ConsumerRepository extends Repository<Consumer> {
   async getConsumerBaskets(id: string): Promise<Consumer> {
     try {
       const consumer = await this.findOne({
-        relations: ['basketID'],
+        relations: ['basketID', 'basketProducerID', 'basketProducerID.userID'],
         where: { userID: { id } },
+        select: ['userID', 'basketID', 'basketProducerID'],
       });
       return consumer;
     } catch (error) {

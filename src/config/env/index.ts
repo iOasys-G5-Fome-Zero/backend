@@ -9,6 +9,9 @@ export default () => {
     refreshSecret: process.env.REFRESH_JWT_SECRET,
     refreshExpiresIn: process.env.REFRESH_EXPIRES_IN,
 
+    fileBaseKey: process.env.FILE_BASE_KEY,
+    fileBaseSecret: process.env.FILE_BASE_SECRET,
+
     googleClientID: process.env.GOOGLE_CLIENT_ID,
     googleSecret: process.env.GOOGLE_SECRET,
     googleRedirectURI: process.env.GOOGLE_REDIRECT_URI,

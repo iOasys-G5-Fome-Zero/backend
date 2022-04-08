@@ -12,8 +12,55 @@ import { Basket } from '@shared/entities/basket/basket.entity';
 
 import { unexpected } from '@shared/constants/errors';
 
+import { ProducerPixDTO } from '@shared/dtos/producer/producerPix.dto';
+
 @EntityRepository(Producer)
 export class ProducerRepository extends Repository<Producer> {
+  async getProducerPix(id: string): Promise<Producer> {
+    try {
+      const producer = await this.findOne({
+        where: { userID: { id } },
+      });
+      return producer;
+    } catch (error) {
+      throw new ConflictException(unexpected(error.message));
+    }
+  }
+
+  async addToBalance(producerID: string, value: number): Promise<Producer> {
+    try {
+      const response = await this.createQueryBuilder('producers')
+        .update(Producer)
+        .set({ balance: () => 'balance + :value' })
+        .setParameter('value', value)
+        .where('userID = :producerID', { producerID })
+        .returning('*')
+        .updateEntity(true)
+        .execute();
+      return response.raw[0];
+    } catch (error) {
+      throw new ConflictException(unexpected(error.message));
+    }
+  }
+
+  async setProducerPix({
+    userID,
+    pixType,
+    pixValue = null,
+  }: ProducerPixDTO): Promise<Producer> {
+    try {
+      const response = await this.createQueryBuilder('producers')
+        .update<Producer>(Producer, { [pixType + 'Pix']: pixValue })
+        .where('userID = :userID', { userID })
+        .returning('*')
+        .updateEntity(true)
+        .execute();
+      return response.raw[0];
+    } catch (error) {
+      throw new ConflictException(unexpected(error.message));
+    }
+  }
+
   async getProducersBaskets(
     size: BasketSize,
     daysPerDeliver: BasketRate,
@@ -40,6 +87,18 @@ export class ProducerRepository extends Repository<Producer> {
       const producer = await this.findOne({
         relations: ['bigBasket', 'mediumBasket', 'smallBasket'],
         where: { userID: { id } },
+      });
+      return producer;
+    } catch (error) {
+      throw new ConflictException(unexpected(error.message));
+    }
+  }
+
+  async getProducerBalance(id: string): Promise<Producer> {
+    try {
+      const producer = await this.findOne({
+        where: { userID: { id } },
+        select: ['balance'],
       });
       return producer;
     } catch (error) {

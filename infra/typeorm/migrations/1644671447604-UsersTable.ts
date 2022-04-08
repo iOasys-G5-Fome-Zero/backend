@@ -7,7 +7,7 @@ export class UsersTable1644671447604 implements MigrationInterface {
         CREATE TABLE users (
             id varchar(255) PRIMARY KEY,
             first_name varchar(255) NOT NULL,
-            last_name varchar(255) NOT NULL,
+            last_name varchar(255) NULL,
             user_type user_type NOT NULL,
             email varchar(255) UNIQUE,
             phone varchar(255) UNIQUE,
