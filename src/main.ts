@@ -8,6 +8,8 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({ origin: '*' });
+
   app.use(cookieParser());
 
   const logger = new Logger('NestApplication');
