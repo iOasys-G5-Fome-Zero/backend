@@ -17,16 +17,16 @@ module.exports = [
     logging: false,
     migrations: ['dist/infra/typeorm/migrations/*.js'],
     entities: ['dist/src/shared/entities/**/*.entity.js'],
-    ssl: true,
-    extra: {
-      ssl: {
-        rejectUnauthorized: false,
-      },
-    },
-    cli: {
-      entitiesDir: 'src/shared/entities/',
-      migrationsDir: 'infra/typeorm/migrations',
-    },
+    // ssl: true,
+    // extra: {
+    //   ssl: {
+    //     rejectUnauthorized: false,
+    //   },
+    // },
+    // cli: {
+    //   entitiesDir: 'src/shared/entities/',
+    //   migrationsDir: 'infra/typeorm/migrations',
+    // },
   },
   {
     name: 'seed',
@@ -40,13 +40,13 @@ module.exports = [
     logging: false,
     migrations: ['dist/infra/typeorm/seeds/*.js'],
     ssl: true,
-    extra: {
-      ssl: {
-        rejectUnauthorized: false,
-      },
-    },
-    cli: {
-      migrationsDir: 'infra/typeorm/seeds',
-    },
+    // extra: {
+    //   ssl: {
+    //     rejectUnauthorized: false,
+    //   },
+    // },
+    // cli: {
+    //   migrationsDir: 'infra/typeorm/seeds',
+    // },
   },
 ];

@@ -4,7 +4,6 @@ import {
   IsNotEmpty,
   IsString,
   Length,
-  Matches,
   IsNumberString,
   ValidateIf,
   IsEnum,
@@ -12,9 +11,6 @@ import {
 } from 'class-validator';
 
 import { UserType } from '@shared/entities/user/usersType.enum';
-
-const PASSWORD_REGEX =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[`~!@#$%^&*=(+){}|'";\\:[><.\],?/-]).{8,}$/;
 
 export class CreateUserRequestBodyDTO {
   @ApiProperty()
@@ -52,7 +48,6 @@ export class CreateUserRequestBodyDTO {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @Length(8, 50)
-  @Matches(PASSWORD_REGEX, { message: 'password-is-too-weak' })
+  @Length(6, 50)
   public password: string;
 }
