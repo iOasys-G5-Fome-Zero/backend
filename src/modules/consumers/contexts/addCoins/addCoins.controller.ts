@@ -1,10 +1,4 @@
-import {
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Patch,
-  Request,
-} from '@nestjs/common';
+import { Controller, HttpCode, HttpStatus, Patch, Param } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -26,8 +20,8 @@ import { UserType } from '@shared/entities/user/usersType.enum';
 export class AddCoinsController {
   constructor(private readonly addCoinsUseCase: AddCoinsUseCase) {}
 
-  @Patch()
-  @Roles(UserType.consumer)
+  @Patch(':consumerID')
+  @Roles(UserType.producer)
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({
     type: Consumer,
@@ -35,8 +29,8 @@ export class AddCoinsController {
   @ApiBadRequestResponse({
     description: 'Bad Request',
   })
-  public async execute(@Request() req) {
-    const consumer = await this.addCoinsUseCase.execute(req.user.id);
+  public async execute(@Param('consumerID') consumerID: string) {
+    const consumer = await this.addCoinsUseCase.execute(consumerID);
     return instanceToInstance(consumer);
   }
 }

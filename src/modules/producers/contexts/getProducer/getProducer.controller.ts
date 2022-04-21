@@ -17,7 +17,7 @@ import { UserType } from '@shared/entities/user/usersType.enum';
 @Controller('producers/:id')
 export class GetProducerController {
   constructor(private readonly getProducerUseCase: GetProducerUseCase) {}
-  @Roles(UserType.producer)
+  @Roles(UserType.producer, UserType.consumer)
   @Post()
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({

@@ -12,6 +12,19 @@ import { unexpected } from '@shared/constants/errors';
 
 @EntityRepository(Consumer)
 export class ConsumerRepository extends Repository<Consumer> {
+  async geProducerSignedBaskets(producerID: string): Promise<Consumer[]> {
+    try {
+      const producersignedBaskets = await this.find({
+        where: { basketProducerID: producerID },
+        relations: ['basketID', 'userID'],
+        select: ['basketID', 'userID'],
+      });
+      return producersignedBaskets;
+    } catch (error) {
+      throw new ConflictException(unexpected(error.message));
+    }
+  }
+
   async getCryptoBalance(id: string): Promise<Consumer> {
     try {
       const consumer = await this.findOne({

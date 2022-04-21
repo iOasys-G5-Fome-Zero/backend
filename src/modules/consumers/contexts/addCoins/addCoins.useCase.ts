@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { ConsumerRepository } from '@modules/consumers/repository/consumer.repository';
@@ -7,6 +7,7 @@ import { RemovedFoodsRepository } from '@modules/consumers/repository/removedFoo
 import { ProducerRepository } from '@modules/producers/repository/producer.repository';
 
 import { Consumer } from '@shared/entities/consumer/consumer.entity';
+import { notFound } from '@shared/constants/errors';
 
 @Injectable()
 export class AddCoinsUseCase {
@@ -25,6 +26,8 @@ export class AddCoinsUseCase {
     const consumerBasket = await this.consumerRepository.getConsumerBaskets(
       consumerID,
     );
+
+    if (!consumerBasket) throw new ConflictException(notFound('consumer'));
 
     const basketFoods = await this.basketFoodRepository.listBasketFoods(
       consumerBasket.basketID,
